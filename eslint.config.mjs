@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Visual source reference; it is a separate Vite application, not Next.js code.
+    "elegant-whispers-studio-main/**",
   ]),
 ]);
 

@@ -1,9 +1,23 @@
-export default function Home() {
+import type { Metadata } from "next"
+import ClientHome from "./client-home"
+import { ThemeProvider } from "@/components/theme-provider"
+
+export const metadata: Metadata = {
+  title: "My Darling — A Love Letter",
+  description:
+    "A romantic keepsake — soft petals, candlelight, and a letter written for you.",
+}
+
+export default function Page() {
   return (
-     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-10">
-      <div className="absolute inset-0 -z-10 bg-[#fff9f7]" >
-      shshhhd
-      </div>
-      </main>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      storageKey="love-letter-theme"
+    >
+      <ClientHome />
+    </ThemeProvider>
   )
 }

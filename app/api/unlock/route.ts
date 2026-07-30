@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 const ACCESS_COOKIE = "site_access";
 const ACCESS_COOKIE_VALUE = "roses-are-red-3456";
-const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
+const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 
 type UnlockRequest = {
   passcode?: unknown;
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   }
 
   if (typeof passcode !== "string" || passcode !== expectedPasscode) {
-    return NextResponse.json({ error: "That is not our secret." }, { status: 401 });
+    return NextResponse.json({ error: "issshh... wrong password" }, { status: 401 });
   }
 
   const response = NextResponse.json({ success: true });
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: THIRTY_DAYS_IN_SECONDS,
+    maxAge: SEVEN_DAYS_IN_SECONDS,
   });
 
   return response;

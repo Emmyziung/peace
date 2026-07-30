@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Allura, Cormorant_Garamond, Manrope } from "next/font/google";
 import { cn } from "@/lib/utils";
 
+const allura = Allura({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-allura",
+});
+
 const cormorantGaramond = Cormorant_Garamond({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-cormorant",
 });
 
 const manrope = Manrope({
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-manrope",
 });
@@ -26,7 +34,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("font-sans", cormorantGaramond.variable, manrope.variable)}
+      suppressHydrationWarning
+      className={cn(
+        "font-sans",
+        cormorantGaramond.variable,
+        manrope.variable,
+        allura.variable,
+      )}
     >
       <body>{children}</body>
     </html>
