@@ -503,9 +503,9 @@ function NowPlaying() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.4em] text-accent">YouTube Music</p>
-                <h3 className="mt-1 font-display text-2xl sm:text-3xl">Songs for you, my love</h3>
+                <h3 className="mt-1 font-display text-2xl sm:text-3xl">My Love My Peace</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {playlistStatus === "ready" ? `${playlist.length} tracks · a candlelit hour` : "Gathering our songs…"}
+                  Click the YTMusic icon to open the playlist.
                 </p>
               </div>
               <a
