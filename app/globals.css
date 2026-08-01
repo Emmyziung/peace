@@ -262,28 +262,13 @@
   .quirky-slide-track::-webkit-scrollbar {
     display: none;
   }
-  .video-seeker {
-    appearance: none;
-    height: 3px;
-    border-radius: 999px;
-    outline: none;
-  }
-  .video-seeker::-webkit-slider-thumb {
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border: 2px solid white;
-    border-radius: 999px;
-    background: var(--color-primary);
-    box-shadow: 0 1px 5px rgb(0 0 0 / .3);
-  }
-  .video-seeker::-moz-range-thumb {
-    width: 9px;
-    height: 9px;
-    border: 2px solid white;
-    border-radius: 999px;
-    background: var(--color-primary);
-    box-shadow: 0 1px 5px rgb(0 0 0 / .3);
+  .restricted-native-video::-webkit-media-controls-mute-button,
+  .restricted-native-video::-webkit-media-controls-volume-slider,
+  .restricted-native-video::-webkit-media-controls-fullscreen-button,
+  .restricted-native-video::-webkit-media-controls-picture-in-picture-button,
+  .restricted-native-video::-webkit-media-controls-cast-button,
+  .restricted-native-video::-webkit-media-controls-overflow-button {
+    display: none !important;
   }
 }
 

@@ -3,7 +3,7 @@ import ClientHome from "./client-home"
 import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
-  title: "My Darling — A Love Letter",
+  title: "My Peace My Love",
   description:
     "A romantic keepsake — soft petals, candlelight, and a letter written for you.",
 }

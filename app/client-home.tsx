@@ -240,27 +240,6 @@ function VideoFeature({
   poster?: StaticImageData
   caption?: string
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0
-
-  const togglePlayback = async () => {
-    const video = videoRef.current
-    if (!video) return
-
-    if (video.paused) {
-      try {
-        await video.play()
-      } catch {
-        setIsPlaying(false)
-      }
-    } else {
-      video.pause()
-    }
-  }
-
   return (
     <div className="relative mx-auto mt-10 w-full max-w-[440px]">
       <div
@@ -270,63 +249,22 @@ function VideoFeature({
         <div className="rounded-[calc(2rem-3px)] border border-[var(--decorative-border)] bg-card/80 p-1.5">
           <div className="group relative aspect-video w-full overflow-hidden rounded-[calc(1.875rem-3px)] border border-accent/25 bg-foreground/10">
             <video
-              ref={videoRef}
               src={src}
               poster={poster.src}
+              controls
+              controlsList="nodownload nofullscreen noremoteplayback"
               disablePictureInPicture
+              disableRemotePlayback
               muted
               playsInline
               preload="metadata"
               aria-label={caption}
-              onClick={togglePlayback}
-              onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
-              onDurationChange={(event) => setDuration(event.currentTarget.duration)}
-              onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onEnded={() => setIsPlaying(false)}
-              className="h-full w-full object-cover"
+              onVolumeChange={(event) => {
+                event.currentTarget.muted = true
+                event.currentTarget.volume = 0
+              }}
+              className="restricted-native-video h-full w-full object-cover"
             />
-
-            <button
-              type="button"
-              onClick={togglePlayback}
-              aria-label={isPlaying ? "Pause video" : "Play video"}
-              className={`absolute left-1/2 top-1/2 grid size-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/45 bg-foreground/45 text-white shadow-lg backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-foreground/60 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
-                isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-              }`}
-            >
-              {isPlaying ? <Pause className="size-5" fill="currentColor" /> : <Play className="ml-0.5 size-5" fill="currentColor" />}
-            </button>
-
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/35 to-transparent px-4 pb-3 pt-8">
-              <div className="flex items-center gap-3">
-                <span className="min-w-8 text-right text-[10px] tabular-nums text-white/90">
-                  {formatTime(currentTime)}
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max={duration || 0}
-                  step="0.01"
-                  value={currentTime}
-                  disabled={!duration}
-                  onChange={(event) => {
-                    const nextTime = Number(event.target.value)
-                    if (videoRef.current) videoRef.current.currentTime = nextTime
-                    setCurrentTime(nextTime)
-                  }}
-                  aria-label="Video progress"
-                  className="video-seeker h-4 min-w-0 flex-1 cursor-pointer disabled:cursor-not-allowed"
-                  style={{
-                    background: `linear-gradient(to right, var(--color-primary) ${progress}%, rgba(255,255,255,.35) ${progress}%)`,
-                  }}
-                />
-                <span className="min-w-8 text-[10px] tabular-nums text-white/90">
-                  {formatTime(duration)}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -780,14 +718,6 @@ function ScratchCard({
     if (clear / (data.length / 32) > 0.45) setRevealed(true)
   }
 
-  useEffect(() => {
-    if (!revealed) return
-    const c = canvasRef.current
-    if (!c) return
-    c.style.transition = "opacity 700ms ease"
-    c.style.opacity = "0"
-  }, [revealed])
-
   return (
     <div
       ref={wrapRef}
@@ -802,12 +732,17 @@ function ScratchCard({
       />
       <canvas
         ref={canvasRef}
-        onPointerDown={start}
-        onPointerMove={move}
-        onPointerUp={end}
-        onPointerCancel={end}
-        onPointerLeave={end}
-        className="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing"
+        aria-hidden
+        onPointerDown={revealed ? undefined : start}
+        onPointerMove={revealed ? undefined : move}
+        onPointerUp={revealed ? undefined : end}
+        onPointerCancel={revealed ? undefined : end}
+        onPointerLeave={revealed ? undefined : end}
+        className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${
+          revealed
+            ? "pointer-events-none touch-auto opacity-0"
+            : "touch-none cursor-grab opacity-100 active:cursor-grabbing"
+        }`}
       />
     </div>
   )
@@ -910,24 +845,35 @@ function LetterSection() {
                 </p>
                 <div className="mt-6 space-y-6 font-display text-lg leading-relaxed text-foreground/90 sm:text-xl">
                   <p>
-                    There are mornings that begin softly — a hush of light, the room
-                    warm — and even before I open my eyes, I am thinking of you. You
-                    are the first sweetness of the day.
+                    This part will probably take me the most time. I hope I&apos;m able
+                    to capture everything I want to say.
                   </p>
                   <p>
-                    I have tried to catch what loving you feels like. It is
-                    candlelight in a quiet room. It is the last rose of summer, held
-                    gently between two hands. It is a promise, whispered, and then
-                    whispered again — because once was never enough.
+                    It&apos;s hard to put into words what having you in my life feels
+                    like. You make every day feel like something worth looking forward
+                    to. Your person, your smile, your beauty, I can&apos;t get enough of
+                    you.
                   </p>
                   <p>
-                    I love the small things most: the way you argue with movies, the
-                    way you fall asleep mid-sentence, the way a room becomes softer
-                    the moment you walk into it.
+                    I only hope you really understand what I mean when I say I love
+                    you. Everything I&apos;m trying to fit into those three words. The
+                    joy I feel when your name pops up on my phone. The smile I can&apos;t
+                    help when I&apos;m thinking about you. Or how I always want to know
+                    every detail of your day.
                   </p>
                   <p>
-                    So here — take this small, careful place. It is only paper and
-                    petals and light, but every line of it is yours.
+                    Many people might say they love your kindness and care, but what I
+                    really love about you is your sweet and tender soul. In fact,
+                    I&apos;d say that&apos;s where your kindness and care come from,
+                    along with so many of the other things I love about you. I love
+                    how gentle your heart is. I&apos;ve always admired that about you,
+                    and I hope you never feel like you have to lose that softness just
+                    because the world can be hard.
+                  </p>
+                  <p>
+                    Like I said, I&apos;m also a work in progress, but know that
+                    I&apos;ll always try to love you as best as I can. If there&apos;s
+                    anyone worth the effort, it&apos;s you, my baby.
                   </p>
                 </div>
 
@@ -958,7 +904,8 @@ const QUIRKY_SLIDES = [
   "I don’t think I have given the answer you were looking for 😔",
   "You might not even remember. Let me remind you.",
   null,
-  "I meannn, do I even stilll have to talk? The picture has done justice 😄",
+  "Before you say i'm exaggerating the height. oyaa, you're veryyy talllllll 😄",
+  "All I know is pictures don’t lie 😝",
 ] as const
 
 function QuirkySlides() {
@@ -1024,7 +971,7 @@ function QuirkySlides() {
               }
             }}
             tabIndex={0}
-            aria-label="A five-slide story. Swipe or use the arrow keys to continue."
+            aria-label={`A ${QUIRKY_SLIDES.length}-slide story. Swipe or use the arrow keys to continue.`}
             className="quirky-slide-track flex snap-x snap-mandatory gap-4 overflow-x-auto rounded-[2rem] px-[7%] py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:gap-6 sm:px-[9%]"
           >
             {QUIRKY_SLIDES.map((copy, index) => (
@@ -1034,7 +981,7 @@ function QuirkySlides() {
                 className="glass-card flex min-h-[360px] w-[86%] shrink-0 snap-center items-center justify-center overflow-hidden rounded-[2rem] p-8 text-center sm:min-h-[430px] sm:w-[82%] sm:p-12"
               >
                 {copy ? (
-                  <p className="max-w-md font-display text-3xl leading-snug text-foreground sm:text-4xl">
+                  <p className="max-w-md font-display text-2xl leading-snug text-foreground sm:text-4xl">
                     {copy}
                   </p>
                 ) : (

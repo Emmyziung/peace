@@ -22,7 +22,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "A Little Love",
+  title: "My Peace My Love",
   description: "A private place made with love.",
 };
 

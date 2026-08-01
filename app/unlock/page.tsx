@@ -70,12 +70,12 @@ export default function UnlockPage() {
           Something I made for you
         </h1>
         <p className="mx-auto mt-5 max-w-sm text-center text-sm leading-6 text-[#805f66]">
-          Say the magic words
+          Input password
         </p>
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
           <label className="sr-only" htmlFor="passcode">
-            Say the magic words
+            Input password
           </label>
           <div className="relative">
             <input

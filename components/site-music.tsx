@@ -233,6 +233,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const pendingPlaybackRef = useRef<{ index: number; time: number } | null>(null)
   const pendingSeekRef = useRef<number | null>(null)
   const preloadSessionRef = useRef<PlaybackSession | null>(null)
+  const backgroundResumeRef = useRef<PlaybackSession | null>(null)
   const playlistIdsRef = useRef<string[]>([])
   const metadataRequestRef = useRef<string | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -322,8 +323,8 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       if (playerRef.current || !mountRef.current) return
 
       new YT.Player(mountRef.current, {
-        height: "1",
-        width: "1",
+        height: "200",
+        width: "200",
         playerVars: {
           autoplay: 0,
           controls: 0,
@@ -367,7 +368,20 @@ export function MusicProvider({ children }: { children: ReactNode }) {
                 pendingSeekRef.current = null
                 pendingPlaybackRef.current = null
               }
-            } else if (event.data === 2 || event.data === 0) {
+            } else if (event.data === 0) {
+              setIsPlaying(false)
+              const ids = event.target.getPlaylist?.().filter(Boolean) || playlistIdsRef.current
+              const index = event.target.getPlaylistIndex?.() ?? -1
+              const reachedPlaylistEnd = ids.length > 0 && index >= ids.length - 1
+
+              if (shouldPlayRef.current && reachedPlaylistEnd) {
+                setPlayerState("loading")
+                event.target.setLoop?.(true)
+                event.target.playVideoAt(0)
+              } else {
+                setPlayerState("idle")
+              }
+            } else if (event.data === 2) {
               setIsPlaying(false)
               setPlayerState("idle")
             }
@@ -430,6 +444,54 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const interval = window.setInterval(() => updateTrack(playerRef.current!), 1000)
     return () => window.clearInterval(interval)
   }, [isPlaying, updateTrack])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        const player = playerRef.current
+        if (!player || !shouldPlayRef.current) return
+
+        const data = player.getVideoData()
+        const index = Math.max(player.getPlaylistIndex?.() ?? track.index, 0)
+        const id = data.video_id || playlistIdsRef.current[index] || track.id
+        if (!id) return
+
+        const knownTrack = playlist.find((item) => item.id === id)
+        const session = {
+          videoId: id,
+          index,
+          currentTime: Math.max(player.getCurrentTime() || 0, 0),
+          title: data.title || knownTrack?.title || track.title,
+          artist: data.author || knownTrack?.artist || track.artist,
+        }
+
+        backgroundResumeRef.current = session
+        saveSession(session)
+        shouldPlayRef.current = false
+        player.pauseVideo()
+        setIsPlaying(false)
+        setPlayerState("idle")
+        return
+      }
+
+      const session = backgroundResumeRef.current
+      if (!session) return
+
+      backgroundResumeRef.current = null
+      setResumeSession(session)
+      setTrack((current) => ({
+        ...current,
+        id: session.videoId,
+        index: session.index,
+        currentTime: session.currentTime,
+        title: session.title,
+        artist: session.artist,
+      }))
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
+  }, [playlist, track.artist, track.id, track.index, track.title])
 
   const play = useCallback(() => {
     shouldPlayRef.current = true
@@ -518,7 +580,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   return (
     <MusicContext.Provider value={value}>
       {children}
-      <div ref={mountRef} aria-hidden className="pointer-events-none fixed -left-px -top-px h-px w-px overflow-hidden opacity-0" />
+      <div ref={mountRef} aria-hidden className="pointer-events-none fixed -left-[200px] -top-[200px] h-[200px] w-[200px] overflow-hidden opacity-0" />
       {preference === null && <MusicWelcome onMusic={play} onSilent={() => { savePreference("silent"); setPreference("silent") }} />}
       {preference === "music" && resumeSession && <MusicResume session={resumeSession} onResume={resume} onDismiss={() => setResumeSession(null)} />}
     </MusicContext.Provider>
